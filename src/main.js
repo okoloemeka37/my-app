@@ -328,7 +328,7 @@ document.querySelector("#check").addEventListener('click', () => {
 
       if ((highestSimilarity * 100) >= simPercent && bestMatchIndex !== -1) {
         let ty = allData[indexNum1]['data'][i1].concat(allData[indexNum2]['data'][bestMatchIndex]);
-        ty.push((highestSimilarity * 100).toFixed(2));
+        ty.push((highestSimilarity * 100).toFixed(2)+"%");
 
         let exportObj = {};
         arr.forEach((key, i) => {
