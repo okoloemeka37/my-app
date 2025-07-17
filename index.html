@@ -13,18 +13,32 @@
 <div class="container py-5">
   <h2 class="mb-4 text-center">📊 Excel Sheet</h2>
 
-  <div class="mb-3">
+  <div class="mb-3" id="FileDiv">
   <label for="formFile" class="form-label">Choose Excel File</label>
-  <input class="form-control" type="file" id="file">
+ 
+   <p class="btn btn-primary w-100" id="fakeIn">Choose Excel File</p>
+  <input class="visually-hidden" type="file" id="file" accept=".xlsx">
+  
 </div>
 
-  <!-- Step 1: Show Sheet Names -->
+<!-- Loading file spinner -->
+
+<div id="loadingSpinner" class=" d-none text-center">
+  <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p>Loading file, please wait...</p>
+</div>
+
+
+
+  <!--  Show Sheet Names -->
   <div class="row" id="sheetCards">
  
   
   </div>
   <p class="hldInd"></p>
-  <!-- Step 2: Column Selector -->
+  <!-- Column Selector -->
   <div id="columnSection" class="mt-5 d-none">
     <div class="card shadow-sm">
       <div class="card-body">
@@ -44,7 +58,7 @@
   </div>
 </div>
 
-<h4>Match Column <span class="col1">(Column 1)</span> Against <span class="col2">(Column 2)</span></h4>
+<h4 class="text-center">Match Column <span class="col1">(Column 1)</span> Against <span class="col2">(Column 2)</span></h4>
 
 <div class="container py-5">
   <h3 class="mb-4 text-center">📄 Preview of Column: <span class="text-primary prevCol"></span></h3>
@@ -61,7 +75,10 @@
 </div>
 
 <div class="ml d-none">
-<button class="btn btn-primary w-50" id="check">check for match</button>
+  
+<button class="btn btn-primary w-50 d-flex text-center" id="check"><div class="spinner-border text-light d-none" id="spin" >
+  <span class="visually-hidden">Loading...</span>
+</div>check for match</button>
 </div> 
 
 <div class="bon">
@@ -94,8 +111,36 @@
 </div>
   </div>
 
+<!-- Backdrop -->
+ <div class="moda  d-none">
+<div class="modal-backdrop fade show"></div>
 
-<div id="app"></div>
+<!-- Modal -->
+<div class="modal fade show  d-block" tabindex="-1" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-header bg-primary text-white rounded-top-4">
+        <h5 class="modal-title">Set Similarity Percentage</h5>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="sim" class="form-label">Enter Similarity Percentage</label>
+          <input class="form-control" min="0" step="10" max="100" type="number" id="simInput" placeholder="e.g. 75">
+        </div>
+      </div>
+      <div class="modal-footer">
+
+        <span class="btn btn-primary" id="simBtn">Enter</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+
+
  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 

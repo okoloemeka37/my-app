@@ -1,8 +1,4 @@
-/*    const firstData=XLSX.utils.sheet_to_json(fg);
-                      const data=new Uint8Array(e.target.result);
-        const workBook=XLSX.read(data,{type:'array'});
 
-        const sheetNames=workBook.SheetNames; */
 
  import levenshtein from 'fast-levenshtein';
 
@@ -20,14 +16,34 @@
          let indexNum2=0;
         let colIndex1;
         let colIndex2;
+
+        let simPercent;
+  let spni=document.querySelector("#loadingSpinner")
+
+
+  //facade InFile Button
+  document.querySelector("#fakeIn").addEventListener("click",()=>{
+    document.querySelector("#file").click()
+  })
+
+
         const Infile=document.querySelector("#file");
 
         Infile.addEventListener("change",(e)=>{
-                const file=e.target.files[0];
+         //show spinner on change
+        spni .classList.remove("d-none")
+        // hide FIleDiv
+        document.querySelector("#FileDiv").classList.add("d-none")
+
+        
+              setTimeout(() => {
+                  const file=e.target.files[0];
                 if (file) {
                     
                     const reader=new FileReader();
                     reader.onload=function(e){
+                       //Hide spinner on Read
+         spni.classList.add("d-none")
                             const data=new Uint8Array(e.target.result);
                             const workBook=XLSX.read(data,{type:'array'});
                            // console.log(workBook)
@@ -41,6 +57,7 @@
                 }
 
               
+              }, 10); // Let browser render the spinner before running the loop
         })
 
 
@@ -65,7 +82,7 @@
                    columns:jsonData[0].length,
                    'colName':jsonData[0]
                 }
-             console.log(df)
+            
                 hold.push(obj)
               allData.push(df);
            
@@ -204,6 +221,11 @@ if (column1 && column2) {
        let yest = confirm(`You selected column: ${chosenCol} from sheet: ${chosenSht}` )
 
          if (yest) {
+
+
+          //closed column Selection Section on choose
+          document.querySelector("#columnSection").classList.add("d-none")
+
             columns.map((eve)=>{
          if ( eve['name']==chosenSht) {
           selectedSht.push(eve['colName'])
@@ -220,8 +242,13 @@ if (column1 && column2) {
          sheetN1=chosenSht;
          }
 
+
+         //disable select button and show similarity modal and call simP()
          if (column1== true && column2==true) {
           document.querySelector(".cc").disabled=true
+          document.querySelector(".moda").classList.remove("d-none")
+
+          simP()
          }
 
         document.querySelector(".prevCol").innerHTML=chosenCol
@@ -230,10 +257,8 @@ if (column1 && column2) {
         const mgcls="#st"+hldInd;
       
        document.querySelector(mgcls).classList.add("dactive")
-        
-
-
-         displ()
+          displ()
+      
          }
 
 
@@ -241,87 +266,109 @@ if (column1 && column2) {
     })
 
 //check
-
-
 document.querySelector("#check").addEventListener('click', () => {
-let gj;
-  const srt=new Set()
- 
-  selectedSht.forEach((e)=>{
-    e.map(e=>{
-     srt.add(e)
-    })
-  });
-let arr=Array.from(srt)
-arr.push('similarity')
+  const spin = document.querySelector("#spin");
+  spin.classList.remove("d-none");
 
-  let exportData=[];
-  let gn1 = allData[indexNum1]['data'];
-  let gn2 = allData[indexNum2]['data'];
+  setTimeout(() => {
+    const srt = new Set();
 
-
-  // Improved cleaner
-  function cleanValue(str) {
-    return str
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '')                      // Remove all spaces
-      .replace(/\b(tab|inj|cap|mg|ml|gm|syrub|syrup|tablet|injection|cream|forte|iv|inj)\b/gi, '') // Common medical suffixes
-      .replace(/[^a-z0-9]/gi, '');              // Strip special chars
-  }
-
- gn1.forEach((val1, i1) => {
-  let rawV1 = val1[colIndex1]?.toString() || '';
-  let v1 = cleanValue(rawV1);
-
-  let bestMatchIndex = -1;
-  let highestSimilarity = 0;
-
-  gn2.forEach((val2, i2) => {
-    let rawV2 = val2[colIndex2]?.toString() || '';
-    let v2 = cleanValue(rawV2);
-
-    const distance = levenshtein.get(v1, v2);
-    const maxLen = Math.max(v1.length, v2.length) || 1;
-    const similarity = 1 - (distance / maxLen);
-
-    if (similarity > highestSimilarity) {
-      highestSimilarity = similarity;
-      bestMatchIndex = i2;
-    }
-  });
-
-  if (highestSimilarity >= 0.6 && bestMatchIndex !== -1) {
-    let ty = allData[indexNum1]['data'][i1].concat(allData[indexNum2]['data'][bestMatchIndex]);
-    ty.push(highestSimilarity.toFixed(2));
-
-    let exportObj = {};
-    arr.forEach((key, i) => {
-      exportObj[key] = ty[i];
+    selectedSht.forEach((e) => {
+      e.forEach((v) => {
+        srt.add(v);
+      });
     });
-    exportData.push(exportObj);
-  }
+
+    let arr = Array.from(srt);
+    arr.push('similarity');
+
+    let exportData = [];
+    let gn1 = allData[indexNum1]['data'];
+    let gn2 = allData[indexNum2]['data'];
+
+    function cleanValue(str) {
+      return str
+        .toLowerCase()
+        .replace(/\btab\b/gi, 'tablet')
+        .replace(/\binj\b/gi, 'injection')
+        .trim()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9]/gi, '');
+    }
+
+    function getForm(str) {
+      const match = str.toLowerCase().match(/\b(tablet|injection|capsule|syrup|cream)\b/i);
+      return match ? match[0] : null;
+    }
+
+    gn1.forEach((val1, i1) => {
+      let rawV1 = val1[colIndex1]?.toString() || '';
+      let v1 = cleanValue(rawV1);
+      let form1 = getForm(rawV1);
+
+      let bestMatchIndex = -1;
+      let highestSimilarity = 0;
+
+      gn2.forEach((val2, i2) => {
+        let rawV2 = val2[colIndex2]?.toString() || '';
+        let v2 = cleanValue(rawV2);
+        let form2 = getForm(rawV2);
+
+        if (form1 && form2 && form1 !== form2) return;
+
+        const distance = levenshtein.get(v1, v2);
+        const maxLen = Math.max(v1.length, v2.length) || 1;
+        const similarity = 1 - (distance / maxLen);
+
+        if (similarity > highestSimilarity) {
+          highestSimilarity = similarity;
+          bestMatchIndex = i2;
+        }
+      });
+
+      if ((highestSimilarity * 100) >= simPercent && bestMatchIndex !== -1) {
+        let ty = allData[indexNum1]['data'][i1].concat(allData[indexNum2]['data'][bestMatchIndex]);
+        ty.push((highestSimilarity * 100).toFixed(2));
+
+        let exportObj = {};
+        arr.forEach((key, i) => {
+          exportObj[key] = ty[i];
+        });
+
+        exportData.push(exportObj);
+      }
+    });
+
+    console.log(exportData);
+
+    const newWb = XLSX.utils.book_new();
+    const newWs = XLSX.utils.json_to_sheet(exportData);
+
+    XLSX.utils.book_append_sheet(newWb, newWs, 'Result');
+
+    spin.classList.add("d-none");
+
+    let bon = document.querySelector(".bon");
+    bon.focus();
+    bon.style.display = "block";
+    bon.addEventListener("click", () => {
+      XLSX.writeFile(newWb, 'matches_result.xlsx');
+    });
+
+    console.log("File generated: matches_result.xlsx");
+  }, 10); // Let browser render the spinner before running the loop
 });
 
-console.log(exportData)
+
+// choose similarity percentage
+
+function simP(){
+  let simBtn=document.querySelector("#simBtn");
+  simBtn.addEventListener("click",()=>{
+    let simInput=document.querySelector("#simInput");
+    simPercent=simInput.value;
+
+       document.querySelector(".moda").classList.add("d-none")
  
-  const newWb=XLSX.utils.book_new();
-  const newWs=XLSX.utils.json_to_sheet(exportData);
-
-  if (XLSX.utils.book_append_sheet(newWb,newWs,'Result')) {
-   console.log("ready") 
-   let bon=document.querySelector(".bon")
-   bon.focus()
-   bon.style.display="block";
-   bon.addEventListener("click",()=>{
- XLSX.writeFile(newWb,'matches_result.xlsx')
-})
-  }
-
-
-  
-console.log("✅ File generated: matches_result.xlsx");
-
-
- 
-});
+  })
+}
