@@ -2,6 +2,11 @@
 
  import levenshtein from 'fast-levenshtein';
 
+ import fuzzysort from 'fuzzysort';
+ import druglist from './druglist';
+import { checkSynonyms, GenPrev } from './funcs';
+
+
         let columns=[];
         let selectedSht=[]
 
@@ -226,22 +231,37 @@ if (column1 && column2) {
           //closed column Selection Section on choose
           document.querySelector("#columnSection").classList.add("d-none")
 
-            columns.map((eve)=>{
-         if ( eve['name']==chosenSht) {
-          selectedSht.push(eve['colName'])
-         }
-         })
+          
         
          if (column2) {
           document.querySelector(".col2").innerHTML=chosenCol;
            Col2=chosenCol;
          sheetN2=chosenSht;
+          columns.map((eve)=>{    
+         if (eve['name']==chosenSht) {
+            let dc=eve['colName']
+             let f2=dc.indexOf(Col2);
+            dc.splice((f2+1),0,`Corrected( ${Col2})`)
+          selectedSht.push(dc);
+         }
+         })
+     
          }else{
            document.querySelector(".col1").innerHTML=chosenCol;
             Col1=chosenCol;
-         sheetN1=chosenSht;
+            sheetN1=chosenSht;
+          columns.map((eve)=>{    
+         if (eve['name']==chosenSht) {
+            let dc=eve['colName']
+             let f1=dc.indexOf(Col1);
+            dc.splice((f1+1),0,`Corrected( ${Col1})`)
+          selectedSht.push(dc);
+         }
+         })
+
          }
 
+          
 
          //disable select button and show similarity modal and call simP()
          if (column1== true && column2==true) {
@@ -267,13 +287,16 @@ if (column1 && column2) {
 
 //check
 document.querySelector("#check").addEventListener('click', () => {
+
+
+   let ty=[];
   const spin = document.querySelector("#spin");
   spin.classList.remove("d-none");
 
   setTimeout(() => {
     const srt = new Set();
-
     selectedSht.forEach((e) => {
+     
       e.forEach((v) => {
         srt.add(v);
       });
@@ -283,34 +306,33 @@ document.querySelector("#check").addEventListener('click', () => {
     arr.push('similarity');
 
     let exportData = [];
-    let gn1 = allData[indexNum1]['data'];
+    let gn1 = allData[indexNum1]['data']; 
     let gn2 = allData[indexNum2]['data'];
 
-    function cleanValue(str) {
-      return str
-        .toLowerCase()
-        .replace(/\btab\b/gi, 'tablet')
-        .replace(/\binj\b/gi, 'injection')
-        .trim()
-        .replace(/\s+/g, '')
-        .replace(/[^a-z0-9]/gi, '');
-    }
+  let td1=  gn1.map(ele => {
+    return checkSynonyms(ele[colIndex1])
+    });
+     let td2=  gn2.map(ele => {
+ return checkSynonyms(ele[colIndex2])
+    });
+   
+    function cleanValue(str) {return str.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/gi, ''); }
 
     function getForm(str) {
       const match = str.toLowerCase().match(/\b(tablet|injection|capsule|syrup|cream)\b/i);
       return match ? match[0] : null;
     }
 
-    gn1.forEach((val1, i1) => {
-      let rawV1 = val1[colIndex1]?.toString() || '';
+    td1.forEach((val1, i1) => {
+      let rawV1 = val1?.toString() || '';
       let v1 = cleanValue(rawV1);
       let form1 = getForm(rawV1);
 
       let bestMatchIndex = -1;
       let highestSimilarity = 0;
 
-      gn2.forEach((val2, i2) => {
-        let rawV2 = val2[colIndex2]?.toString() || '';
+      td2.forEach((val2, i2) => {
+        let rawV2 = val2?.toString() || '';
         let v2 = cleanValue(rawV2);
         let form2 = getForm(rawV2);
 
@@ -327,19 +349,31 @@ document.querySelector("#check").addEventListener('click', () => {
       });
 
       if ((highestSimilarity * 100) >= simPercent && bestMatchIndex !== -1) {
-        let ty = allData[indexNum1]['data'][i1].concat(allData[indexNum2]['data'][bestMatchIndex]);
+       let bm2=gn2[bestMatchIndex].map(r=>r)
+        bm2.splice((colIndex2+1),0,td2[bestMatchIndex])
+
+
+        
+       let bm1=gn1[i1].map(r=>r);
+        bm1.splice((colIndex1+1),0,td1[i1])
+
+
+        ty=bm1.concat(bm2)
+   
         ty.push((highestSimilarity * 100).toFixed(2)+"%");
 
-        let exportObj = {};
-        arr.forEach((key, i) => {
-          exportObj[key] = ty[i];
-        });
+      
 
-        exportData.push(exportObj);
+         let exObj = {};
+        arr.forEach((key, i) => {
+          exObj[key] = ty[i];
+        });
+        exportData.push(exObj);  
       }
     });
+    GenPrev(arr,exportData)
 
-    console.log(exportData);
+
 
     const newWb = XLSX.utils.book_new();
     const newWs = XLSX.utils.json_to_sheet(exportData);
@@ -355,8 +389,8 @@ document.querySelector("#check").addEventListener('click', () => {
       XLSX.writeFile(newWb, 'matches_result.xlsx');
     });
 
-    console.log("File generated: matches_result.xlsx");
-  }, 10); // Let browser render the spinner before running the loop
+    console.log("File generated: matches_result.xlsx"); 
+  }, 1); // Let browser render the spinner before running the loop
 });
 
 
@@ -372,3 +406,31 @@ function simP(){
  
   })
 }
+
+
+
+/* 
+function SpellCheck(str) {
+  const numIndex = str.search(/[0-9]/);
+  let textPart = str;
+
+  if (numIndex !== -1) {
+    textPart = str.substring(0, numIndex);
+  }
+
+  // Just trim & lowercase
+  const cleaned = textPart.replace(/\s+/g,'').toLowerCase().trim();
+
+  let gb = druglist.map(e => e.toLowerCase());
+  const result = fuzzysort.go(cleaned, gb);
+
+ if ( result.total===0) {
+ console.log(checkSynonyms(str))
+ }else{
+  console.log(result)
+ }
+}
+ */
+
+
+
