@@ -241,7 +241,7 @@ if (column1 && column2) {
          if (eve['name']==chosenSht) {
             let dc=eve['colName']
              let f2=dc.indexOf(Col2);
-            dc.splice((f2+1),0,`Corrected( ${Col2})`)
+            dc.splice((f2+1),0,`Corrected ${Col2}`)
           selectedSht.push(dc);
          }
          })
@@ -254,7 +254,7 @@ if (column1 && column2) {
          if (eve['name']==chosenSht) {
             let dc=eve['colName']
              let f1=dc.indexOf(Col1);
-            dc.splice((f1+1),0,`Corrected( ${Col1})`)
+            dc.splice((f1+1),0,`Corrected ${Col1}`)
           selectedSht.push(dc);
          }
          })
@@ -304,6 +304,7 @@ document.querySelector("#check").addEventListener('click', () => {
 
     let arr = Array.from(srt);
     arr.push('similarity');
+    arr.push('checking')
 
     let exportData = [];
     let gn1 = allData[indexNum1]['data']; 
@@ -361,6 +362,7 @@ document.querySelector("#check").addEventListener('click', () => {
         ty=bm1.concat(bm2)
    
         ty.push((highestSimilarity * 100).toFixed(2)+"%");
+        ty.push(true)
 
       
 
@@ -371,25 +373,9 @@ document.querySelector("#check").addEventListener('click', () => {
         exportData.push(exObj);  
       }
     });
-    GenPrev(arr,exportData)
+    GenPrev(arr,exportData,Col1,Col2)
 
 
-
-    const newWb = XLSX.utils.book_new();
-    const newWs = XLSX.utils.json_to_sheet(exportData);
-
-    XLSX.utils.book_append_sheet(newWb, newWs, 'Result');
-
-    spin.classList.add("d-none");
-
-    let bon = document.querySelector(".bon");
-    bon.focus();
-    bon.style.display = "block";
-    bon.addEventListener("click", () => {
-      XLSX.writeFile(newWb, 'matches_result.xlsx');
-    });
-
-    console.log("File generated: matches_result.xlsx"); 
   }, 1); // Let browser render the spinner before running the loop
 });
 

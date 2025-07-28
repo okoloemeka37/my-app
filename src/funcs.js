@@ -3,7 +3,7 @@
 
 
 //generate preview
-export function GenPrev(Head,body) {
+export function GenPrev(Head,body,Col1,Col2) {
   document.querySelector(".fPrev").classList.add("d-none")
    document.querySelector("#check").classList.add("d-none")
   document.querySelector(".secPrev").classList.remove("d-none")
@@ -14,24 +14,35 @@ export function GenPrev(Head,body) {
   Prevhead.append(th);
 
  Head.forEach(hd => {
-  let th=document.createElement("th");
+  if (hd=="checking") {} else {
+     let th=document.createElement("th");
   th.scope='col';
   th.innerHTML=hd;
   Prevhead.appendChild(th)
+  }
+ 
  });
 
 
- body.forEach(bod => {
+ body.sort((a,b)=>{
+   const percentA = parseFloat(a['similarity']);
+  const percentB = parseFloat(b['similarity']);
+  return percentA - percentB;
+ })
+
+ body.forEach((bod,i) => {
 let tr=document.createElement("tr");
   const td=document.createElement("td");
-  td.innerHTML=`<input class="form-check-input" type="checkbox" checked>`
+  td.innerHTML=`<input class="form-check-input inputCheck" type="checkbox" index=${i} checked >`
   tr.append(td)
  for (let key in bod ) {
    
+  if (key=="checking") {
+    
+  }else{
   const td=document.createElement("td");
   if (key =='similarity') {
 
-    console.log(bod[key])
     let span=document.createElement("span");
     
     span.innerHTML=bod[key];
@@ -49,11 +60,12 @@ let tr=document.createElement("tr");
   
   }
 tr.append(td) 
-  
+}
  }
  document.querySelector('.prevBody').append(tr)
 })
 
+frt(body,Col1,Col2)
 }
 
 
@@ -65,6 +77,10 @@ tr.append(td)
 
 //check synonyms
 export function checkSynonyms(str) {
+if (str ==undefined) {
+
+}
+  else{
     let gh = str.toLowerCase(); // keep original word
     const numIndex = gh.search(/[0-9]/);
 
@@ -113,6 +129,48 @@ const finalWord=Parts.map((w,i)=>{
   }
 })
 
- return (finalWord.join(" ")+ (numIndex !== -1? gh.substring(numIndex):'')).toUpperCase();
+ return (finalWord.join(" ")+ (numIndex !== -1? gh.substring(numIndex):'')).toUpperCase(); }
+
+}
+
+
+function frt(body,Col1,Col2) {
+  const inputCheck=document.querySelectorAll(".inputCheck");
+  inputCheck.forEach(rg => {
+    rg.addEventListener('change',()=>{
+     const ind=rg.getAttribute("index");
+     body[ind]['checking']=rg.checked;
+    })
+  });
+  ExportSheet(body,Col1,Col2)
+}
+
+function ExportSheet(body,Col1,Col2) {
+  let bog=body
+  const ExpButton=document.querySelector("#ExportSheet");
+  ExpButton.addEventListener("click",()=>{
+    const filterBody=body.filter(obj=>obj['checking'] == true)
+    const r1=`Corrected ${Col1}`;
+    const r2=`Corrected ${Col2}`
+filterBody.forEach(obj=>{
+ 
+   obj[Col1]=obj[r1];
+   obj[Col2]=obj[r2];
+
+   delete obj[r1];
+   delete obj[r2];
+   delete obj['checking'];
+  
+})
+
+  const newWb = XLSX.utils.book_new();
+    const newWs = XLSX.utils.json_to_sheet(filterBody);
+
+    XLSX.utils.book_append_sheet(newWb, newWs, 'Result');
+
+    spin.classList.add("d-none");
+     XLSX.writeFile(newWb, 'matches_result.xlsx');  
+  })
+  
 
 }
