@@ -1,4 +1,7 @@
- import synonyms from './synonyms';
+ import fuzzysort from 'fuzzysort';
+import druglist from './druglist';
+import synonyms from './synonyms';
+
   import levenshtein from 'fast-levenshtein';
 
 
@@ -73,63 +76,45 @@ frt(body,Col1,Col2)
 
 
 
-
+function cleanInput(str) {
+  if (!str || typeof str !== 'string') return ''; // safely handle null/undefined
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 //check synonyms
 export function checkSynonyms(str) {
-if (str ==undefined) {
+ let gh = cleanInput(str);
+ const sp=gh.split(" ");
+ sp.forEach((ed,i) => {
+    if (synonyms.has(ed)) {
+      sp[i]=synonyms.get(ed)
+    }
 
+ });
+
+ const rt=sp.join(" ");
+
+
+   
+let list = druglist.map(name => cleanInput(name)); 
+const indexedList=fuzzysort.prepare(list);
+const result=fuzzysort.go(rt,indexedList);
+
+
+if (result['total']!==0) {
+  
+
+if(result[0]['_score'] >= -50){return result[0].target.toUpperCase()}else{
+  return rt.toUpperCase();
 }
-  else{
-    let gh = str.toLowerCase(); // keep original word
-    const numIndex = gh.search(/[0-9]/);
-
-  let textPart = gh;
-
-  if (numIndex !== -1) {textPart = gh.substring(0, numIndex); }
- let Parts=textPart.split(" ");
-
-let A=new Set();
-let B=new Set()
-      let nim=[];
-let similarity;
-Parts.forEach((e,i)=>{
-A.add(i)
-  if (e.length!==0) {
-      for (let key of Object.keys(synonyms)) {
- 
-   const distance = levenshtein.get(e, key);
-   const maxLen = Math.max(e.length, key.length);
-   similarity = 1 - (distance / maxLen);
-   // store best match with highest similarity
-  if (similarity >0.8 || similarity ==0.8) {
-    e=key
-    B.add(i)
-    nim[i]=synonyms[e]
-    //nim.push(synonyms[e])
-  }
+}else{
+  return rt.toUpperCase()
 }
-  }
 
-})
-
-const c=A.difference(B)
-const rem=[];
-rem.push(" ")
-c.forEach((r)=>{
-rem.push(Parts[r])
-})
-A=Array.from(A)
-
-const finalWord=Parts.map((w,i)=>{
-  if(B.has(i)){
-    return nim[i] +" "
-  }else{
-    return w +" "
-  }
-})
-
- return (finalWord.join(" ")+ (numIndex !== -1? gh.substring(numIndex):'')).toUpperCase(); }
 
 }
 
@@ -174,3 +159,4 @@ filterBody.forEach(obj=>{
   
 
 }
+
