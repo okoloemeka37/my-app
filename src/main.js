@@ -314,7 +314,7 @@ document.querySelector("#check").addEventListener('click', () => {
     return checkSynonyms(ele[colIndex1])
     });
      let td2=  gn2.map(ele => {
- return checkSynonyms(ele[colIndex2])
+ return ele[colIndex2]
     });
    
     function cleanValue(str) {return str.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/gi, ''); }
