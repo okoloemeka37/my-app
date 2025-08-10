@@ -2,9 +2,6 @@
 import druglist from './druglist';
 import synonyms from './synonyms';
 
-  import levenshtein from 'fast-levenshtein';
-
-
 //generate preview
 export function GenPrev(Head,body,Col1,Col2) {
   document.querySelector(".fPrev").classList.add("d-none")
@@ -132,9 +129,11 @@ function frt(body,Col1,Col2) {
 
 function ExportSheet(body,Col1,Col2) {
   let bog=body
+  console.log(body)
   const ExpButton=document.querySelector("#ExportSheet");
   ExpButton.addEventListener("click",()=>{
     const filterBody=body.filter(obj=>obj['checking'] == true)
+    console.log(filterBody)
     const r1=`Corrected ${Col1}`;
     const r2=`Corrected ${Col2}`
 filterBody.forEach(obj=>{
