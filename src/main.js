@@ -395,28 +395,5 @@ function simP(){
 
 
 
-/* 
-function SpellCheck(str) {
-  const numIndex = str.search(/[0-9]/);
-  let textPart = str;
-
-  if (numIndex !== -1) {
-    textPart = str.substring(0, numIndex);
-  }
-
-  // Just trim & lowercase
-  const cleaned = textPart.replace(/\s+/g,'').toLowerCase().trim();
-
-  let gb = druglist.map(e => e.toLowerCase());
-  const result = fuzzysort.go(cleaned, gb);
-
- if ( result.total===0) {
- console.log(checkSynonyms(str))
- }else{
-  console.log(result)
- }
-}
- */
-
 
 
