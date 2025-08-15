@@ -7,6 +7,19 @@
 import { checkSynonyms, GenPrev } from './funcs';
 
 
+    async function correctWords(words) {
+  const res = await fetch("http://localhost:1200/spellcheck", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ words }),
+  });
+
+  const data = await res.json();
+  return data.corrected;
+}
+
+
+    let arrayToLoop;
         let columns=[];
         let selectedSht=[]
 
@@ -157,7 +170,7 @@ const temp=`   <div class="col-md-4 mb-4" >
         }
 
         
-function displ(){
+ function displ(){
   //  const{a,b}=allData
 
 let gn;
@@ -168,6 +181,17 @@ if (column1 && !column2) {
   tj=Col1
   gn=allData[indexNum1]['data']
    colIndex1=gn[0].indexOf(tj)
+
+  async function rfc(params) {
+     let gn1 = gn.map(ef=>{
+     return ef[colIndex1]
+    });
+    gn1.shift()
+    const rf=gn1.map(rf=>checkSynonyms(rf));
+
+arrayToLoop= await correctWords(rf); 
+   }
+   rfc()
 }
 if (column2) {
   tj=Col2
@@ -307,15 +331,15 @@ document.querySelector("#check").addEventListener('click', () => {
     arr.push('checking')
 
     let exportData = [];
-    let gn1 = allData[indexNum1]['data']; 
+    let gn1 = allData[indexNum1]['data'];
+ 
     let gn2 = allData[indexNum2]['data'];
 
-  let td1=  gn1.map(ele => {
-    return checkSynonyms(ele[colIndex1])
-    });
-     let td2=  gn2.map(ele => {
- return ele[colIndex2]
-    });
+  let td1= arrayToLoop;
+
+  console.log(td1)
+
+     let td2=  gn2.map(ele =>checkSynonyms(ele[colIndex2]));
    
     function cleanValue(str) {return str.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/gi, ''); }
 
@@ -392,6 +416,8 @@ function simP(){
  
   })
 }
+
+
 
 
 
