@@ -8,7 +8,7 @@ import { checkSynonyms, GenPrev } from './funcs';
 
 
     async function correctWords(words) {
-  const res = await fetch("https://spellcor.onrender.com/spellcheck", {
+  const res = await fetch("http://localhost:1200/spellcheck", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ words }),
@@ -19,7 +19,7 @@ import { checkSynonyms, GenPrev } from './funcs';
 }
 
 
-    let arrayToLoop;
+    let arrayToLoop=null;
         let columns=[];
         let selectedSht=[]
 
@@ -337,9 +337,7 @@ document.querySelector("#check").addEventListener('click', () => {
 
   let td1= arrayToLoop;
 
-  console.log(td1)
-
-     let td2=  gn2.map(ele =>checkSynonyms(ele[colIndex2]));
+     let td2=  gn2.map(ele =>ele[colIndex2]);
    
     function cleanValue(str) {return str.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/gi, ''); }
 
@@ -416,7 +414,6 @@ function simP(){
  
   })
 }
-
 
 
 
