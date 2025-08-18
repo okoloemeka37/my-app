@@ -8,7 +8,7 @@ import { checkSynonyms, GenPrev } from './funcs';
 
 
     async function correctWords(words) {
-  const res = await fetch("http://localhost:1200/spellcheck", {
+  const res = await fetch("https://spellcor.onrender.com/spellcheck", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ words }),
