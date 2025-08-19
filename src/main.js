@@ -6,19 +6,7 @@
  import druglist from './druglist';
 import { checkSynonyms, GenPrev } from './funcs';
 
-
-    async function correctWords(words) {
-  const res = await fetch("https://spellcor.onrender.com/spellcheck", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ words }),
-  });
-
-  const data = await res.json();
-  return data.corrected;
-}
-
-
+      let gbn_var=false;
     let arrayToLoop=null;
         let columns=[];
         let selectedSht=[]
@@ -182,15 +170,27 @@ if (column1 && !column2) {
   gn=allData[indexNum1]['data']
    colIndex1=gn[0].indexOf(tj)
 
-  async function rfc(params) {
-     let gn1 = gn.map(ef=>{
-     return ef[colIndex1]
-    });
-    gn1.shift()
-    const rf=gn1.map(rf=>checkSynonyms(rf));
+   function rfc(params) {
+        let gn1 = gn.map(ef=>{
+        return ef[colIndex1]
+        });
+        gn1.shift()
+        const raw=gn1.map(rf=>checkSynonyms(rf));
 
-arrayToLoop= await correctWords(rf); 
+        const res = fetch("https://spellcor.onrender.com/spellcheck", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ raw }),
+  }).then(res=>res.json())
+  .then(data=>{
+  arrayToLoop= data.corrected;
+  if (gbn_var) {
+    rtf();
+  }
+  })
+
    }
+
    rfc()
 }
 if (column2) {
@@ -310,7 +310,14 @@ if (column1 && column2) {
     })
 
 //check
-document.querySelector("#check").addEventListener('click', () => {
+document.querySelector("#check").addEventListener('click',()=>{
+  gbn_var=true;
+  rtf()
+});
+
+
+
+function rtf() {
 
 
    let ty=[];
@@ -336,10 +343,13 @@ document.querySelector("#check").addEventListener('click', () => {
     let gn2 = allData[indexNum2]['data'];
 
   let td1= arrayToLoop;
+  if (arrayToLoop) {
+    console.log("respons ready")
+
 
      let td2=  gn2.map(ele =>ele[colIndex2]);
    
-    function cleanValue(str) {return str.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/gi, ''); }
+    function cleanValue(str) {return str.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9%]/gi, ''); }
 
     function getForm(str) {
       const match = str.toLowerCase().match(/\b(tablet|injection|capsule|syrup|cream)\b/i);
@@ -396,10 +406,12 @@ document.querySelector("#check").addEventListener('click', () => {
       }
     });
     GenPrev(arr,exportData,Col1,Col2)
-
+  }else{
+    console.log("response loading")
+  }
 
   }, 1); // Let browser render the spinner before running the loop
-});
+}
 
 
 // choose similarity percentage
@@ -415,8 +427,9 @@ function simP(){
   })
 }
 
-
-
+if (arrayToLoop !==null) {
+  console.log("hello")
+}
 
 
 
