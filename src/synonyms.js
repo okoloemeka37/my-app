@@ -155,7 +155,7 @@ const synonyms = new Map([
   ["t3", "liothyronine"],
   ["t4", "levothyroxine"],
   ["epo", "erythropoietin"],
-  ['amp','ampoule']
+  ['amp','ampoule'],
   ["g-csf", "granulocyte colony stimulating factor"],
   ["lhrh", "luteinizing hormone releasing hormone"],
   ["hgh", "human growth hormone"],
