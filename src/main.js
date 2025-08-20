@@ -1,9 +1,5 @@
-
-
  import levenshtein from 'fast-levenshtein';
 
- import fuzzysort from 'fuzzysort';
- import druglist from './druglist';
 import { checkSynonyms, GenPrev } from './funcs';
 
       let gbn_var=false;
@@ -170,28 +166,6 @@ if (column1 && !column2) {
   gn=allData[indexNum1]['data']
    colIndex1=gn[0].indexOf(tj)
 
-   function rfc(params) {
-        let gn1 = gn.map(ef=>{
-        return ef[colIndex1]
-        });
-        gn1.shift()
-        const raw=gn1.map(rf=>checkSynonyms(rf));
-
-        const res = fetch("https://spellcor.onrender.com/spellcheck", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ raw }),
-  }).then(res=>res.json())
-  .then(data=>{
-  arrayToLoop= data.corrected;
-  if (gbn_var) {
-    rtf();
-  }
-  })
-
-   }
-
-   rfc()
 }
 if (column2) {
   tj=Col2
@@ -342,10 +316,7 @@ function rtf() {
  
     let gn2 = allData[indexNum2]['data'];
 
-  let td1= arrayToLoop;
-  if (arrayToLoop) {
-    console.log("respons ready")
-
+  let td1= gn1.map(ele=>checkSynonyms(ele[colIndex1]));
 
      let td2=  gn2.map(ele =>ele[colIndex2]);
    
@@ -406,9 +377,7 @@ function rtf() {
       }
     });
     GenPrev(arr,exportData,Col1,Col2)
-  }else{
-    console.log("response loading")
-  }
+
 
   }, 1); // Let browser render the spinner before running the loop
 }
@@ -426,10 +395,4 @@ function simP(){
  
   })
 }
-
-if (arrayToLoop !==null) {
-  console.log("hello")
-}
-
-
 
